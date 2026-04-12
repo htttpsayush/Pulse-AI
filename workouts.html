@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseAI — Workouts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+<style>
+:root {
+    --accent: #F5C518;
+    --accent-dim: rgba(245,197,24,0.12);
+    --accent-glow: rgba(245,197,24,0.25);
+    --bg: #0C0C0C;
+    --card: #141414;
+    --card2: #1A1A1A;
+    --border: rgba(255,255,255,0.07);
+    --text: #FFFFFF;
+    --text-secondary: #777;
+    --text-dim: #444;
+    --danger: #FF5A5A;
+    --success: #4ADE80;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --bottom-nav-h: 66px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ── */
+.layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 28px 16px;
+    position: fixed; top: 0; left: 0;
+    height: 100vh; z-index: 100;
+}
+
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 8px; }
+.logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: grid; place-items: center; color: #000; font-size: 18px; }
+.logo h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+.text-accent { color: var(--accent); }
+
+.user-profile { display: flex; align-items: center; gap: 12px; padding: 14px 12px; background: var(--card2); border-radius: var(--radius-sm); margin-bottom: 24px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--accent); display: grid; place-items: center; color: #000; font-size: 16px; font-weight: 700; }
+.user-info h2 { font-size: 14px; font-weight: 600; }
+.role { font-size: 11px; color: var(--text-secondary); }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: var(--radius-sm); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.nav-item i { font-size: 17px; }
+.nav-item:hover { color: var(--text); background: var(--card2); }
+.nav-item.active { color: var(--accent); background: var(--accent-dim); }
+.nav-item.logout { color: var(--danger); }
+.nav-item.logout:hover { background: rgba(255,90,90,0.1); }
+.sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* Main */
+.main-content { flex: 1; margin-left: 240px; padding: 28px; padding-bottom: 40px; }
+
+/* Header */
+.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+.page-title h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
+.page-title p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+/* ── OPTION CARDS ── */
+.option-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.option-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.option-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.option-card:hover { border-color: var(--accent-glow); transform: translateY(-3px); }
+.option-card:hover::before { transform: scaleX(1); }
+
+.option-card.ai-card { border-color: var(--accent-glow); background: linear-gradient(135deg, var(--card) 60%, rgba(245,197,24,0.05)); }
+.option-card.ai-card::before { transform: scaleX(1); }
+
+.option-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: grid; place-items: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+}
+
+.option-icon.manual { background: rgba(255,255,255,0.06); color: var(--text); }
+.option-icon.ai { background: var(--accent-dim); color: var(--accent); }
+
+.option-card h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.option-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+.option-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    margin-top: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* ── WORKOUTS LIST ── */
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-header h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+
+.workouts-list { display: flex; flex-direction: column; gap: 10px; }
+
+.workout-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px;
+    transition: all 0.2s;
+}
+.workout-item:hover { border-color: var(--accent-glow); }
+.workout-item.completed { opacity: 0.5; }
+.workout-item.completed .workout-name { text-decoration: line-through; }
+
+.workout-icon { width: 40px; height: 40px; background: var(--accent-dim); border-radius: 11px; display: grid; place-items: center; color: var(--accent); font-size: 18px; flex-shrink: 0; }
+.workout-info { flex: 1; }
+.workout-name { font-size: 15px; font-weight: 600; }
+.workout-detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.workout-actions { display: flex; align-items: center; gap: 8px; }
+
+.checkbox-wrapper { position: relative; }
+.checkbox-wrapper input[type="checkbox"] { opacity: 0; position: absolute; width: 24px; height: 24px; cursor: pointer; z-index: 1; }
+.checkbox-custom { width: 24px; height: 24px; border: 2px solid var(--border); border-radius: 7px; transition: all 0.2s; }
+.checkbox-wrapper input:checked ~ .checkbox-custom { background: var(--accent); border-color: var(--accent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"); background-size: 14px; background-repeat: no-repeat; background-position: center; }
+
+.btn-del { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--text-dim); cursor: pointer; display: grid; place-items: center; font-size: 15px; transition: all 0.2s; }
+.btn-del:hover { color: var(--danger); border-color: rgba(255,90,90,0.3); }
+
+.empty-state { text-align: center; padding: 50px 20px; color: var(--text-dim); }
+.empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+.empty-state p { font-size: 14px; }
+
+/* ── MODALS ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 200; display: none; place-items: center; padding: 20px; }
+.modal-overlay.show { display: grid; }
+
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; animation: fadeUp 0.3s ease both; }
+.modal-sm { max-width: 440px; }
+.modal-lg { max-width: 560px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.modal-header h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+.modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--text-secondary); cursor: pointer; display: grid; place-items: center; font-size: 18px; transition: all 0.2s; }
+.modal-close:hover { color: var(--text); background: var(--card2); }
+
+/* Form */
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap i { position: absolute; left: 14px; color: var(--text-dim); font-size: 16px; pointer-events: none; transition: color 0.2s; }
+.input-wrap input, .input-wrap select {
+    width: 100%; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 14px 12px 42px;
+    color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color 0.2s;
+    appearance: none;
+}
+.input-wrap input::placeholder { color: var(--text-dim); }
+.input-wrap input:focus, .input-wrap select:focus { border-color: rgba(245,197,24,0.4); }
+.input-wrap:focus-within i { color: var(--accent); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #000; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s, transform 0.15s; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* AI Plan Result */
+.ai-plan-result { margin-top: 20px; display: none; }
+.ai-plan-result.show { display: block; }
+
+.plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.plan-header h4 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); }
+
+.plan-days { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 4px; }
+.plan-days::-webkit-scrollbar { width: 3px; }
+.plan-days::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.plan-day { background: var(--card2); border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--border); }
+.plan-day-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+.plan-exercise { font-size: 12px; color: var(--text-secondary); padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.plan-exercise:last-child { border-bottom: none; }
+
+.btn-add-plan { width: 100%; padding: 12px; background: var(--success); color: #000; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 14px; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-add-plan:hover { opacity: 0.88; }
+
+/* Loading spinner */
+.ai-loading { text-align: center; padding: 30px; display: none; }
+.ai-loading.show { display: block; }
+.ai-loading i { font-size: 32px; color: var(--accent); animation: spin 1s linear infinite; }
+.ai-loading p { font-size: 13px; color: var(--text-secondary); margin-top: 10px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1e1e1e; border: 1px solid var(--danger); color: var(--danger); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--success); color: var(--success); }
+
+/* Bottom Nav */
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-h); background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 200; padding: 0 8px; padding-bottom: env(safe-area-inset-bottom); }
+.bottom-nav .nav-item { flex: 1; flex-direction: column; justify-content: center; gap: 4px; padding: 8px 4px; font-size: 10px; border-radius: 0; text-align: center; height: 100%; }
+.bottom-nav .nav-item i { font-size: 20px; }
+.bottom-nav .nav-item.active { color: var(--accent); background: none; }
+
+@media (max-width: 1024px) {
+    .sidebar { transform: translateX(-100%); }
+    .main-content { margin-left: 0; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-h) + 20px); }
+    .bottom-nav { display: flex; }
+}
+
+@media (max-width: 600px) {
+    .option-cards { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .modal { padding: 24px 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i class="ri-pulse-line"></i></div>
+            <h1>Pulse<span class="text-accent">AI</span></h1>
+        </div>
+        <div class="user-profile">
+            <div class="avatar" id="sidebar-avatar">A</div>
+            <div class="user-info">
+                <h2 id="sidebar-username">User</h2>
+                <span class="role">Member</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i> Dashboard</a>
+            <a href="workouts.html" class="nav-item active"><i class="ri-run-fill"></i> Workouts</a>
+            <a href="#" class="nav-item"><i class="ri-robot-2-fill"></i> AI Modules</a>
+            <a href="#" class="nav-item"><i class="ri-bar-chart-fill"></i> Progress</a>
+            <a href="#" class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item logout" id="logout-btn"><i class="ri-logout-box-r-line"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+        <div class="top-header">
+            <div class="page-title">
+                <h1>My Workouts 💪</h1>
+                <p>Track, plan and crush your fitness goals</p>
+            </div>
+        </div>
+
+        <!-- Option Cards -->
+        <div class="option-cards">
+            <div class="option-card" onclick="openManualModal()">
+                <div class="option-icon manual"><i class="ri-add-circle-fill"></i></div>
+                <h3>Add Workout</h3>
+                <p>Manually add a workout with name, sets, reps or duration.</p>
+            </div>
+            <div class="option-card ai-card" onclick="openAIModal()">
+                <div class="option-icon ai"><i class="ri-robot-2-fill"></i></div>
+                <h3>AI Workout Plan</h3>
+                <p>Tell us your goals and get a personalized plan powered by Gemini AI.</p>
+                <span class="option-badge"><i class="ri-sparkling-fill"></i> Powered by Gemini</span>
+            </div>
+        </div>
+
+        <!-- Workouts List -->
+        <div class="section-header">
+            <h2>Your Workouts</h2>
+        </div>
+
+        <div class="workouts-list" id="workouts-list">
+            <div class="empty-state">
+                <i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i>
+                <p>Loading workouts...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i><span>Dashboard</span></a>
+        <a href="workouts.html" class="nav-item active"><i class="ri-run-fill"></i><span>Workouts</span></a>
+        <a href="#" class="nav-item"><i class="ri-robot-2-fill"></i><span>Modules</span></a>
+        <a href="#" class="nav-item"><i class="ri-bar-chart-fill"></i><span>Progress</span></a>
+        <a href="#" class="nav-item" id="logout-mob"><i class="ri-logout-box-r-line"></i><span>Logout</span></a>
+    </nav>
+</div>
+
+<!-- Manual Add Modal -->
+<div class="modal-overlay" id="manual-modal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>Add Workout</h3>
+            <button class="modal-close" onclick="closeModal('manual-modal')"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="form-group">
+            <label>Workout Name</label>
+            <div class="input-wrap">
+                <i class="ri-run-fill"></i>
+                <input type="text" id="workout-name" placeholder="e.g. Push-ups">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Details</label>
+            <div class="input-wrap">
+                <i class="ri-information-line"></i>
+                <input type="text" id="workout-detail" placeholder="e.g. 3 sets x 15 reps">
+            </div>
+        </div>
+        <button class="btn-primary" id="add-btn" onclick="addWorkout()">
+            Add Workout <i class="ri-add-line"></i>
+        </button>
+    </div>
+</div>
+
+<!-- AI Plan Modal -->
+<div class="modal-overlay" id="ai-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3>🤖 AI Workout Plan</h3>
+            <button class="modal-close" onclick="closeModal('ai-modal')"><i class="ri-close-line"></i></button>
+        </div>
+
+        <div id="ai-form-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Age</label>
+                    <div class="input-wrap">
+                        <i class="ri-user-line"></i>
+                        <input type="number" id="ai-age" placeholder="e.g. 20">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <div class="input-wrap">
+                        <i class="ri-scales-line"></i>
+                        <input type="number" id="ai-weight" placeholder="e.g. 70">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Height (cm)</label>
+                    <div class="input-wrap">
+                        <i class="ri-ruler-line"></i>
+                        <input type="number" id="ai-height" placeholder="e.g. 175">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Plan Days</label>
+                    <div class="input-wrap">
+                        <i class="ri-calendar-line"></i>
+                        <input type="number" id="ai-days" placeholder="e.g. 7" min="1" max="30">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fitness Goal</label>
+                    <div class="input-wrap">
+                        <i class="ri-focus-3-line"></i>
+                        <select id="ai-goal">
+                            <option value="">Select goal</option>
+                            <option value="weight loss">Weight Loss</option>
+                            <option value="muscle gain">Muscle Gain</option>
+                            <option value="endurance">Endurance</option>
+                            <option value="flexibility">Flexibility</option>
+                            <option value="general fitness">General Fitness</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Diet Type</label>
+                    <div class="input-wrap">
+                        <i class="ri-restaurant-line"></i>
+                        <select id="ai-diet">
+                            <option value="">Select diet</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="non-vegetarian">Non-Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="keto">Keto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Fitness Level</label>
+                <div class="input-wrap">
+                    <i class="ri-bar-chart-fill"></i>
+                    <select id="ai-level">
+                        <option value="">Select level</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" id="generate-btn" onclick="generatePlan()">
+                Generate Plan <i class="ri-sparkling-fill"></i>
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="ai-loading" id="ai-loading">
+            <i class="ri-loader-4-line"></i>
+            <p>Gemini AI is creating your personalized plan...</p>
+        </div>
+
+        <!-- Plan Result -->
+        <div class="ai-plan-result" id="ai-plan-result">
+            <div class="plan-header">
+                <h4>✨ Your Personalized Plan</h4>
+            </div>
+            <div class="plan-days" id="plan-days"></div>
+            <button class="btn-add-plan" onclick="addPlanToWorkouts()">
+                <i class="ri-add-circle-fill"></i> Add All to My Workouts
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+const GEMINI_KEY = 'AIzaSyDFikgLbPprSBzeOcZ91A0ZxAM2f5eooQg' ; // apni key yahan daal
+const token = localStorage.getItem('token');
+if (!token) window.location.href = 'auth.html';
+
+let generatedPlan = [];
+
+// Toast
+function showToast(msg, type = 'error') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Load user info
+fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
+.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
+.then(user => {
+    document.getElementById('sidebar-username').textContent = user.name;
+    document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+});
+
+// Load workouts
+function loadWorkouts() {
+    fetch(`${API}/workouts/`, { headers: { 'Authorization': `Bearer ${token}` } })
+    .then(r => r.json())
+    .then(workouts => {
+        const container = document.getElementById('workouts-list');
+        if (workouts.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="ri-calendar-todo-line"></i>
+                    <p>No workouts yet — add one or generate an AI plan!</p>
+                </div>`;
+            return;
+        }
+        container.innerHTML = workouts.map(w => `
+            <div class="workout-item ${w.is_completed ? 'completed' : ''}" id="item-${w.id}">
+                <div class="workout-icon"><i class="ri-run-fill"></i></div>
+                <div class="workout-info">
+                    <div class="workout-name">${w.name}</div>
+                    <div class="workout-detail">${w.detail}</div>
+                </div>
+                <div class="workout-actions">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="chk-${w.id}" ${w.is_completed ? 'checked' : ''} onchange="toggleWorkout(${w.id})">
+                        <div class="checkbox-custom"></div>
+                    </div>
+                    <button class="btn-del" onclick="deleteWorkout(${w.id})"><i class="ri-delete-bin-line"></i></button>
+                </div>
+            </div>
+        `).join('');
+    })
+    .catch(() => showToast('Failed to load workouts'));
+}
+
+loadWorkouts();
+
+// Toggle
+window.toggleWorkout = function(id) {
+    fetch(`${API}/workouts/${id}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${token}` } })
+    .then(r => r.json())
+    .then(data => {
+        const item = document.getElementById(`item-${id}`);
+        if (data.is_completed) item.classList.add('completed');
+        else item.classList.remove('completed');
+    });
+}
+
+// Delete
+window.deleteWorkout = function(id) {
+    fetch(`${API}/workouts/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
+    .then(() => {
+        document.getElementById(`item-${id}`).remove();
+        showToast('Workout deleted!', 'success');
+        // Check if empty
+        if (document.querySelectorAll('.workout-item').length === 0) loadWorkouts();
+    });
+}
+
+// Add workout manually
+window.addWorkout = function() {
+    const name = document.getElementById('workout-name').value.trim();
+    const detail = document.getElementById('workout-detail').value.trim();
+    if (!name || !detail) { showToast('Name aur detail dono fill karo!'); return; }
+
+    const btn = document.getElementById('add-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ri-loader-4-line"></i> Adding...';
+
+    fetch(`${API}/workouts/`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, detail })
+    })
+    .then(r => r.json())
+    .then(() => {
+        showToast('Workout added!', 'success');
+        closeModal('manual-modal');
+        document.getElementById('workout-name').value = '';
+        document.getElementById('workout-detail').value = '';
+        loadWorkouts();
+    })
+    .catch(() => showToast('Failed to add workout'))
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Add Workout <i class="ri-add-line"></i>';
+    });
+}
+
+// Modals
+function openManualModal() { document.getElementById('manual-modal').classList.add('show'); }
+function openAIModal() { document.getElementById('ai-modal').classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+        if (e.target === overlay) overlay.classList.remove('show');
+    });
+});
+
+// Generate AI Plan
+async function generatePlan() {
+    const age    = document.getElementById('ai-age').value;
+    const weight = document.getElementById('ai-weight').value;
+    const height = document.getElementById('ai-height').value;
+    const days   = document.getElementById('ai-days').value;
+    const goal   = document.getElementById('ai-goal').value;
+    const diet   = document.getElementById('ai-diet').value;
+    const level  = document.getElementById('ai-level').value;
+
+    if (!age || !weight || !height || !days || !goal || !diet || !level) {
+        showToast('Sab fields fill karo!');
+        return;
+    }
+
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    document.getElementById('ai-loading').classList.add('show');
+    document.getElementById('ai-plan-result').classList.remove('show');
+
+    const prompt = `Create a ${days}-day workout plan for a ${age}-year-old, ${weight}kg, ${height}cm tall person.
+Goal: ${goal}. Fitness level: ${level}. Diet: ${diet}.
+Return ONLY a JSON array like this (no extra text, no markdown):
+[
+  {"day": "Day 1", "exercises": [{"name": "Push-ups", "detail": "3 sets x 15 reps"}, ...]},
+  ...
+]
+Keep exercises simple and practical. Max 4-5 exercises per day.`;
+
+    try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data = await res.json();
+        const text = data.candidates[0].content.parts[0].text;
+        const clean = text.replace(/```json|```/g, '').trim();
+        generatedPlan = JSON.parse(clean);
+
+        renderPlan(generatedPlan);
+        document.getElementById('ai-loading').classList.remove('show');
+        document.getElementById('ai-plan-result').classList.add('show');
+
+    } catch (err) {
+        document.getElementById('ai-loading').classList.remove('show');
+        showToast('AI plan generate nahi hua. Try again!');
+        btn.disabled = false;
+    }
+}
+
+function renderPlan(plan) {
+    const container = document.getElementById('plan-days');
+    container.innerHTML = plan.map(day => `
+        <div class="plan-day">
+            <div class="plan-day-title">${day.day}</div>
+            ${day.exercises.map(ex => `
+                <div class="plan-exercise">
+                    <span>${ex.name}</span>
+                    <span>${ex.detail}</span>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+// Add all plan workouts to DB
+async function addPlanToWorkouts() {
+    const btn = document.querySelector('.btn-add-plan');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ri-loader-4-line"></i> Adding...';
+
+    let added = 0;
+    for (const day of generatedPlan) {
+        for (const ex of day.exercises) {
+            await fetch(`${API}/workouts/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: `${day.day} — ${ex.name}`, detail: ex.detail })
+            });
+            added++;
+        }
+    }
+
+    showToast(`${added} workouts added successfully!`, 'success');
+    closeModal('ai-modal');
+    loadWorkouts();
+
+    // Reset
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ri-add-circle-fill"></i> Add All to My Workouts';
+    document.getElementById('ai-plan-result').classList.remove('show');
+    document.getElementById('generate-btn').disabled = false;
+}
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', e => {
+    e.preventDefault();
+    localStorage.removeItem('token');
+    window.location.href = 'auth.html';
+});
+document.getElementById('logout-mob').addEventListener('click', e => {
+    e.preventDefault();
+    localStorage.removeItem('token');
+    window.location.href = 'auth.html';
+});
+
+// Enter key
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('manual-modal').classList.contains('show')) addWorkout();
+});
+</script>
+
+</body>
+</html>
