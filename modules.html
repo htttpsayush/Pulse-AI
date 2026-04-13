@@ -145,13 +145,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
                 <span class="role">Member</span>
             </div>
         </div>
-        <nav class="sidebar-nav">
-            <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i> Dashboard</a>
-            <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i> Workouts</a>
-            <a href="#" class="nav-item" data-nav="progress"><i class="ri-bar-chart-fill"></i><span>Progress</span></a>
-            <a href="modules.html" class="nav-item active"><i class="ri-robot-2-fill"></i> AI Modules</a>
-            <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
-        </nav>
+        
         <div class="sidebar-footer">
             <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
         </div>
@@ -166,6 +160,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </div>
 
         <div class="modules-grid">
+            <div class="module-card">
+                <div class="module-icon"><i class="ri-camera-fill"></i></div>
+                <h3>Food Analyzer</h3>
+                <p>Upload food image and get instant nutrition breakdown with 7-day tracking.</p>
+                <div class="module-status">
+                    <div class="status-dot live"></div>
+                    <span style="color:#4ADE80">Live</span>
+                </div>
+                <button class="btn-launch" onclick="window.location.href='food-analyzer.html'">
+                    Launch <i class="ri-arrow-right-line"></i>
+                </button>
+            </div>
+            
             <div class="module-card">
                 <div class="module-icon"><i class="ri-arrow-up-circle-fill"></i></div>
                 <h3>PushUp Counter</h3>
@@ -206,7 +213,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i><span>Dashboard</span></a>
         <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i><span>Workouts</span></a>
-        <a href="#" class="nav-item" data-nav="progress"><i class="ri-bar-chart-fill"></i><span>Progress</span></a>
         <a href="modules.html" class="nav-item active"><i class="ri-robot-2-fill"></i><span>Modules</span></a>
         <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i><span>Settings</span></a>
     </nav>
