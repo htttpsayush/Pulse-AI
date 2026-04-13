@@ -332,9 +332,9 @@ body {
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i><span>Dashboard</span></a>
         <a href="workouts.html" class="nav-item active"><i class="ri-run-fill"></i><span>Workouts</span></a>
-        <a href="#" class="nav-item"><i class="ri-robot-2-fill"></i><span>Modules</span></a>
+        <a href="#" class="nav-item" data-nav="progress"><i class="ri-bar-chart-fill"></i><span>Progress</span></a>
+        <a href="modules.html" class="nav-item"><i class="ri-robot-2-fill"></i><span>Modules</span></a>
         <a href="#" class="nav-item"><i class="ri-bar-chart-fill"></i><span>Progress</span></a>
-        <a href="#" class="nav-item" id="logout-mob"><i class="ri-logout-box-r-line"></i><span>Logout</span></a>
     </nav>
 </div>
 
@@ -475,7 +475,7 @@ body {
 
 <script>
 const API = 'http://127.0.0.1:8000';
-const GEMINI_KEY = 'AIzaSyDFikgLbPprSBzeOcZ91A0ZxAM2f5eooQg' ; // apni key yahan daal
+const GEMINI_KEY = '' ; // apni key yahan daal
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'auth.html';
 
@@ -694,19 +694,6 @@ async function addPlanToWorkouts() {
     document.getElementById('ai-plan-result').classList.remove('show');
     document.getElementById('generate-btn').disabled = false;
 }
-
-// Logout
-document.getElementById('logout-btn').addEventListener('click', e => {
-    e.preventDefault();
-    localStorage.removeItem('token');
-    window.location.href = 'auth.html';
-});
-document.getElementById('logout-mob').addEventListener('click', e => {
-    e.preventDefault();
-    localStorage.removeItem('token');
-    window.location.href = 'auth.html';
-});
-
 // Enter key
 document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && document.getElementById('manual-modal').classList.contains('show')) addWorkout();

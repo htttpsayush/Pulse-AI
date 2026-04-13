@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initNav();
 });
 
-// Display current date
 function initDate() {
     const dateEl = document.getElementById('current-date');
     if (dateEl) {
@@ -37,15 +36,12 @@ function initUser() {
         return res.json();
     })
     .then(user => {
-    if (!user) return;
-    // Greeting update
-    document.querySelector('.greeting h1').innerHTML = 
-        `Good Morning, ${user.name} <span class="wave">👋</span>`;
-    // Sidebar naam
-    const sidebarName = document.getElementById('sidebar-username');
-    if (sidebarName) sidebarName.textContent = user.name;
+        if (!user) return;
+        document.querySelector('.greeting h1').innerHTML = 
+            `Good Morning, ${user.name} <span class="wave">👋</span>`;
+        const sidebarName = document.getElementById('sidebar-username');
+        if (sidebarName) sidebarName.textContent = user.name;
 
-    // Admin button — sirf admin ko dikhe
         if (user.role === 'admin') {
             const adminBtn = document.createElement('a');
             adminBtn.href = 'admin.html';
@@ -53,20 +49,20 @@ function initUser() {
             adminBtn.innerHTML = '<i class="ri-shield-user-fill"></i> Admin Panel';
             document.querySelector('.header-actions').prepend(adminBtn);
         }
-    });
 
-    // Logout
-    const logoutBtn = document.querySelector('.nav-item.logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            window.location.href = 'auth.html';
+        // Real stats
+        fetch('http://127.0.0.1:8000/workouts/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(r => r.json())
+        .then(workouts => {
+            document.querySelector('.stats-row .stat-card:first-child .stat-value').textContent = workouts.length;
+            const completed = workouts.filter(w => w.is_completed).length;
+            document.querySelector('.stats-row .stat-card:nth-child(2) .stat-value').textContent = completed;
         });
-    }
+    });
 }
 
-// Animate progress rings — all start at 0
 function initRings() {
     setTimeout(() => {
         const rings = document.querySelectorAll('.ring-front');
@@ -77,9 +73,6 @@ function initRings() {
         });
     }, 500);
 }
-
-// Workout List — empty by default, no hardcoded workouts
-const workouts = [];
 
 function initWorkoutList() {
     const listContainer = document.getElementById('workout-list');
@@ -101,7 +94,6 @@ function initWorkoutList() {
             `;
             return;
         }
-
         listContainer.innerHTML = workouts.map(workout => `
             <div class="workout-item ${workout.is_completed ? 'completed' : ''}" id="item-${workout.id}">
                 <div class="workout-main">
@@ -131,7 +123,6 @@ function initWorkoutList() {
 window.toggleWorkout = function(id) {
     const token = localStorage.getItem('token');
     const item = document.getElementById(`item-${id}`);
-    const checkbox = document.getElementById(`w-${id}`);
 
     fetch(`http://127.0.0.1:8000/workouts/${id}`, {
         method: 'PATCH',
@@ -144,7 +135,6 @@ window.toggleWorkout = function(id) {
     });
 }
 
-// Chart — all zeros, no mock data
 let progressChart;
 function initChart() {
     const ctx = document.getElementById('progressChart')?.getContext('2d');
@@ -221,15 +211,12 @@ function initChart() {
     });
 }
 
-// Navigation
 function initNav() {
     const navItems = document.querySelectorAll('.nav-item[data-nav]');
     navItems.forEach(item => {
         item.addEventListener('click', e => {
             const href = item.getAttribute('href');
-            // Agar real link hai toh redirect hone do
             if (href && href !== '#') return;
-            // Sirf # wale links ke liye active class toggle karo
             e.preventDefault();
             const target = item.getAttribute('data-nav');
             navItems.forEach(n => n.classList.remove('active'));
