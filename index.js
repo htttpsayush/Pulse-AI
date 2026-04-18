@@ -5,8 +5,8 @@ const token = localStorage.getItem('token');
 const API_BASE =
     window.location.hostname === '127.0.0.1' ||
     window.location.hostname === 'localhost'
-        ? 'https://pulseai-backend-9yj2.onrender.com'
-        : '';
+        ? 'http://127.0.0.1:8000'
+        : 'https://pulseai-backend-9yj2.onrender.com';
 
 if (!token) {
     window.location.href = 'auth.html';
