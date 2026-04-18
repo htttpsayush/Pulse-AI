@@ -245,7 +245,7 @@ function logout() {
     window.location.href = 'auth.html';
 }
 
-fetch('http://127.0.0.1:8000/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+fetch('https://pulseai-backend-9yj2.onrender.com/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
 .then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
 .then(user => {
     document.getElementById('sidebar-username').textContent = user.name;
