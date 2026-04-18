@@ -329,6 +329,11 @@ body::before {
 <div class="toast" id="toast"></div>
 
 <script>
+// Already logged in — redirect
+if (localStorage.getItem('token')) {
+    window.location.href = 'index.html';
+}
+
 const API = 'https://pulseai-backend-9yj2.onrender.com';
 
 function showToast(msg, type = 'error') {
