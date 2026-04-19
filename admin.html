@@ -4,624 +4,256 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PulseAI — Admin Panel</title>
+    <meta name="description" content="PulseAI admin panel — manage users and platform settings.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
-<style>
-:root {
-    --accent: #F5C518;
-    --accent-dim: rgba(245,197,24,0.12);
-    --accent-glow: rgba(245,197,24,0.25);
-    --bg: #0C0C0C;
-    --card: #141414;
-    --card2: #1A1A1A;
-    --border: rgba(255,255,255,0.07);
-    --text: #FFFFFF;
-    --text-secondary: #777;
-    --text-dim: #444;
-    --danger: #FF5A5A;
-    --success: #4ADE80;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --sidebar-w: 220px;
-}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .admin-header .user-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+            background: var(--card);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .users-table-wrap {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
 
-body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    -webkit-font-smoothing: antialiased;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background: var(--card2);
+        }
+        th {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 14px 18px;
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+        }
+        tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
 
-/* ── SIDEBAR ── */
-.sidebar {
-    width: var(--sidebar-w);
-    background: var(--card);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 24px 14px;
-    position: fixed;
-    top: 0; left: 0;
-    height: 100vh;
-    z-index: 100;
-}
+        .role-cell {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .role-cell.admin {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8B5CF6;
+        }
+        .role-cell.user {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
 
-.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 6px; }
-.logo-icon {
-    width: 34px; height: 34px;
-    background: var(--accent);
-    border-radius: 9px;
-    display: grid; place-items: center;
-    color: #000; font-size: 16px;
-}
-.logo h1 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
-.logo h1 span { color: var(--accent); }
-.logo .badge {
-    margin-left: auto;
-    background: var(--accent-dim);
-    color: var(--accent);
-    font-size: 9px;
-    font-weight: 700;
-    padding: 3px 7px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-}
+        .delete-user-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+        .delete-user-btn:hover {
+            opacity: 1;
+            background: rgba(255, 90, 90, 0.1);
+        }
 
-.admin-profile {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px;
-    background: var(--card2);
-    border-radius: var(--radius-sm);
-    margin-bottom: 24px;
-}
-.admin-avatar {
-    width: 36px; height: 36px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: grid; place-items: center;
-    color: #000; font-size: 16px;
-    flex-shrink: 0;
-}
-.admin-info h3 { font-size: 13px; font-weight: 600; }
-.admin-info span { font-size: 11px; color: var(--accent); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent); }
 
-.sidebar-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-
-.nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 13px; font-weight: 500;
-    transition: all 0.2s;
-    cursor: pointer;
-    border: none; background: none; width: 100%; text-align: left;
-}
-.nav-item i { font-size: 16px; }
-.nav-item:hover { color: var(--text); background: var(--card2); }
-.nav-item.active { color: var(--accent); background: var(--accent-dim); }
-.nav-item.danger { color: var(--danger); }
-.nav-item.danger:hover { background: rgba(255,90,90,0.1); }
-
-.sidebar-footer { border-top: 1px solid var(--border); padding-top: 12px; }
-
-/* ── MAIN ── */
-.main {
-    margin-left: var(--sidebar-w);
-    flex: 1;
-    padding: 28px;
-    min-height: 100vh;
-}
-
-/* ── HEADER ── */
-.top-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-}
-
-.page-title h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px; font-weight: 800;
-}
-.page-title p { color: var(--text-secondary); font-size: 13px; margin-top: 3px; }
-
-.header-right { display: flex; align-items: center; gap: 12px; }
-
-.search-bar {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 9px 16px;
-}
-.search-bar i { color: var(--text-dim); font-size: 15px; }
-.search-bar input {
-    background: none; border: none; outline: none;
-    color: var(--text); font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    width: 180px;
-}
-.search-bar input::placeholder { color: var(--text-dim); }
-
-/* ── STATS ROW ── */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex; align-items: center; gap: 14px;
-    transition: border-color 0.2s, transform 0.2s;
-}
-.stat-card:hover { border-color: var(--accent-glow); transform: translateY(-2px); }
-
-.stat-icon {
-    width: 42px; height: 42px;
-    background: var(--accent-dim);
-    border-radius: 12px;
-    display: grid; place-items: center;
-    color: var(--accent); font-size: 20px;
-    flex-shrink: 0;
-}
-
-.stat-info h3 { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.stat-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
-.stat-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
-
-/* ── USERS TABLE ── */
-.section-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 16px;
-}
-.section-header h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px; font-weight: 700;
-}
-
-.table-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-}
-
-table { width: 100%; border-collapse: collapse; }
-
-thead tr {
-    background: var(--card2);
-    border-bottom: 1px solid var(--border);
-}
-
-th {
-    padding: 12px 16px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-align: left;
-}
-
-tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: var(--card2); }
-
-td {
-    padding: 14px 16px;
-    font-size: 13px;
-    vertical-align: middle;
-}
-
-.user-cell { display: flex; align-items: center; gap: 10px; }
-.user-avatar-sm {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: var(--accent-dim);
-    display: grid; place-items: center;
-    color: var(--accent);
-    font-size: 13px; font-weight: 700;
-    flex-shrink: 0;
-}
-.user-name { font-weight: 600; font-size: 14px; }
-.user-email { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
-
-.role-badge {
-    display: inline-flex; align-items: center;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-}
-.role-badge.admin { background: var(--accent-dim); color: var(--accent); }
-.role-badge.user { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
-
-.date-cell { color: var(--text-secondary); font-size: 12px; }
-
-.action-btns { display: flex; gap: 6px; }
-.btn-icon {
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: none;
-    color: var(--text-secondary);
-    display: grid; place-items: center;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-.btn-icon:hover { color: var(--accent); border-color: var(--accent-glow); }
-.btn-icon.del:hover { color: var(--danger); border-color: rgba(255,90,90,0.3); }
-
-/* Empty state */
-.empty-row td {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-dim);
-}
-
-/* Loading */
-.loading-row td {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-secondary);
-}
-
-/* Toast */
-.toast {
-    position: fixed;
-    bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #1e1e1e;
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 13px; font-weight: 500;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-}
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.success { border-color: var(--success); color: var(--success); }
-
-/* Modal */
-.modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    z-index: 200;
-    display: none;
-    place-items: center;
-}
-.modal-overlay.show { display: grid; }
-
-.modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    width: 100%;
-    max-width: 380px;
-    animation: fadeUp 0.3s ease both;
-}
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.modal h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.modal p { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
-.modal-btns { display: flex; gap: 10px; }
-.btn-cancel {
-    flex: 1; padding: 11px;
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-size: 13px; font-weight: 600;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: background 0.2s;
-}
-.btn-cancel:hover { background: rgba(255,255,255,0.1); }
-.btn-danger {
-    flex: 1; padding: 11px;
-    background: var(--danger);
-    border: none;
-    border-radius: var(--radius-sm);
-    color: #fff;
-    font-size: 13px; font-weight: 700;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: opacity 0.2s;
-}
-.btn-danger:hover { opacity: 0.85; }
-</style>
+        @media (max-width: 768px) {
+            th, td { padding: 10px 12px; font-size: 13px; }
+            .admin-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="logo">
-        <div class="logo-icon"><i class="ri-pulse-line"></i></div>
-        <h1>Pulse<span>AI</span></h1>
-        <span class="badge">ADMIN</span>
+        <div class="logo-icon"><i class="ri-pulse-fill"></i></div>
+        <div class="logo-text">Pulse<span>AI</span></div>
     </div>
-
-    <div class="admin-profile">
-        <div class="admin-avatar"><i class="ri-shield-user-fill"></i></div>
-        <div class="admin-info">
-            <h3 id="admin-name">Admin</h3>
-            <span>Super Admin</span>
+    <div class="user-profile">
+        <div class="avatar" id="sidebar-avatar">A</div>
+        <div class="user-info">
+            <h2 id="sidebar-username">User</h2>
+            <span class="role">Admin</span>
         </div>
     </div>
-
     <nav class="sidebar-nav">
-        <a class="nav-item active"><i class="ri-dashboard-fill"></i> Dashboard</a>
-        <a class="nav-item"><i class="ri-group-fill"></i> Users</a>
-        <a class="nav-item"><i class="ri-run-fill"></i> Workouts</a>
-        <a class="nav-item"><i class="ri-robot-2-fill"></i> AI Modules</a>
-        <a class="nav-item"><i class="ri-bar-chart-fill"></i> Analytics</a>
-        <a class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
+        <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i> Dashboard</a>
+        <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i> Workouts</a>
+        <a href="modules.html" class="nav-item"><i class="ri-robot-2-fill"></i> Modules</a>
+        <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
     </nav>
-
     <div class="sidebar-footer">
-        <button class="nav-item danger" id="logout-btn">
+        <button class="nav-item logout-btn" onclick="logout()">
             <i class="ri-logout-box-r-line"></i> Logout
         </button>
     </div>
 </aside>
 
-<!-- Main -->
+<!-- MAIN -->
 <main class="main">
-    <div class="top-header">
-        <div class="page-title">
-            <h1>Admin Panel</h1>
-            <p>Manage users, workouts and platform settings</p>
-        </div>
-        <div class="header-right">
-            <div class="search-bar">
-                <i class="ri-search-line"></i>
-                <input type="text" id="search-input" placeholder="Search users...">
-            </div>
-        </div>
+    <a href="index.html" class="back-link"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+
+    <div class="admin-header">
+        <h1 class="page-title" style="margin-bottom: 0;">Admin Panel</h1>
+        <div class="user-count" id="user-count">Loading...</div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="ri-group-fill"></i></div>
-            <div class="stat-info">
-                <h3>Total Users</h3>
-                <div class="stat-value" id="total-users">—</div>
-                <div class="stat-sub">Registered</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="ri-shield-user-fill"></i></div>
-            <div class="stat-info">
-                <h3>Admins</h3>
-                <div class="stat-value" id="total-admins">—</div>
-                <div class="stat-sub">With admin access</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="ri-user-follow-fill"></i></div>
-            <div class="stat-info">
-                <h3>Regular Users</h3>
-                <div class="stat-value" id="total-regular">—</div>
-                <div class="stat-sub">Active members</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="ri-calendar-check-fill"></i></div>
-            <div class="stat-info">
-                <h3>Today</h3>
-                <div class="stat-value" id="today-date">—</div>
-                <div class="stat-sub">Current date</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Users Table -->
-    <div class="section-header">
-        <h2>All Users</h2>
-    </div>
-
-    <div class="table-card">
+    <div class="users-table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>User</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
                     <th>Role</th>
-                    <th>Joined</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="users-table">
-                <tr class="loading-row">
-                    <td colspan="4"><i class="ri-loader-4-line"></i> Loading users...</td>
+            <tbody id="users-tbody">
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-secondary);">
+                        <span class="spinner" style="color: var(--accent);"></span>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </main>
 
-<!-- Delete Modal -->
-<div class="modal-overlay" id="delete-modal">
-    <div class="modal">
-        <h3>Delete User?</h3>
-        <p>Are you sure you want to delete this user? This action cannot be undone.</p>
-        <div class="modal-btns">
-            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-            <button class="btn-danger" id="confirm-delete">Delete</button>
-        </div>
-    </div>
-</div>
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <a href="index.html"><i class="ri-dashboard-fill"></i> Dashboard</a>
+    <a href="workouts.html"><i class="ri-run-fill"></i> Workouts</a>
+    <a href="modules.html"><i class="ri-robot-2-fill"></i> Modules</a>
+    <a href="settings.html"><i class="ri-settings-4-fill"></i> Settings</a>
+</nav>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://pulseai-backend-9yj2.onrender.com';
-let allUsers = [];
-let deleteUserId = null;
-
-// Auth check — sirf admin aa sake
+const API = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000'
+    : 'https://pulseai-backend-9yj2.onrender.com';
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'auth.html';
 
-// Toast
-function showToast(msg, type = 'error') {
+function showToast(msg, type='error') {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
 }
+function logout() { localStorage.removeItem('token'); window.location.href = 'auth.html'; }
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// Date
-document.getElementById('today-date').textContent = 
-    new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-// Load admin info
-fetch(`${API}/users/me`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-})
-.then(r => {
-    if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; }
-    return r.json();
-})
+// ─── Verify Admin ───────────────────────────────────────
+fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
+.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
 .then(user => {
     if (user.role !== 'admin') {
-        showToast('Access denied! Admins only.');
-        setTimeout(() => window.location.href = 'index.html', 2000);
+        window.location.href = 'index.html';
         return;
     }
-    document.getElementById('admin-name').textContent = user.name;
+    document.getElementById('sidebar-username').textContent = user.name;
+    document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
     loadUsers();
 });
 
-// Load all users
-function loadUsers() {
-    fetch(`${API}/users/all`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(r => r.json())
-    .then(users => {
-        allUsers = users;
-        renderUsers(users);
+// ─── Load Users ─────────────────────────────────────────
+async function loadUsers() {
+    try {
+        const res = await fetch(`${API}/users/all`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to load users');
+        const users = await res.json();
 
-        // Stats
-        document.getElementById('total-users').textContent = users.length;
-        document.getElementById('total-admins').textContent = users.filter(u => u.role === 'admin').length;
-        document.getElementById('total-regular').textContent = users.filter(u => u.role === 'user').length;
-    })
-    .catch(() => showToast('Failed to load users'));
-}
+        document.getElementById('user-count').textContent = `${users.length} users`;
 
-// Render users
-function renderUsers(users) {
-    const tbody = document.getElementById('users-table');
+        const tbody = document.getElementById('users-tbody');
+        if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--text-secondary);">No users found</td></tr>';
+            return;
+        }
 
-    if (users.length === 0) {
-        tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No users found</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = users.map(user => `
-        <tr>
-            <td>
-                <div class="user-cell">
-                    <div class="user-avatar-sm">${user.name.charAt(0).toUpperCase()}</div>
-                    <div>
-                        <div class="user-name">${user.name}</div>
-                        <div class="user-email">${user.email}</div>
-                    </div>
-                </div>
-            </td>
-            <td>
-                <span class="role-badge ${user.role}">${user.role}</span>
-            </td>
-            <td class="date-cell">
-                ${user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-            </td>
-            <td>
-                <div class="action-btns">
-                    <button class="btn-icon del" onclick="confirmDelete(${user.id}, '${user.name}')" title="Delete">
-                        <i class="ri-delete-bin-line"></i>
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td>${u.id}</td>
+                <td>${escapeHtml(u.name)}</td>
+                <td>${escapeHtml(u.email)}</td>
+                <td><span class="role-cell ${u.role}">${u.role}</span></td>
+                <td>
+                    <button class="delete-user-btn" onclick="deleteUser(${u.id}, '${escapeHtml(u.name)}')" title="Delete user">
+                        <i class="ri-delete-bin-6-line"></i>
                     </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        showToast(err.message);
+    }
 }
 
-// Search
-document.getElementById('search-input').addEventListener('input', e => {
-    const q = e.target.value.toLowerCase();
-    const filtered = allUsers.filter(u =>
-        u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
-    );
-    renderUsers(filtered);
-});
-
-// Delete modal
-function confirmDelete(id, name) {
-    deleteUserId = id;
-    document.getElementById('delete-modal').classList.add('show');
+async function deleteUser(userId, name) {
+    if (!confirm(`Delete user "${name}" (ID: ${userId})?`)) return;
+    try {
+        const res = await fetch(`${API}/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to delete user');
+        showToast(`User "${name}" deleted`, 'success');
+        loadUsers();
+    } catch (err) {
+        showToast(err.message);
+    }
 }
-
-function closeModal() {
-    document.getElementById('delete-modal').classList.remove('show');
-    deleteUserId = null;
-}
-
-document.getElementById('confirm-delete').addEventListener('click', () => {
-    if (!deleteUserId) return;
-    // TODO: DELETE API connect karein backend se
-    fetch(`${API}/users/${deleteUserId}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-})
-.then(r => r.json())
-.then(data => {
-    showToast('User deleted successfully!', 'success');
-    allUsers = allUsers.filter(u => u.id !== deleteUserId);
-    renderUsers(allUsers);
-    document.getElementById('total-users').textContent = allUsers.length;
-    document.getElementById('total-regular').textContent = allUsers.filter(u => u.role === 'user').length;
-    closeModal();
-})
-.catch(() => showToast('Failed to delete user'));
-    allUsers = allUsers.filter(u => u.id !== deleteUserId);
-    renderUsers(allUsers);
-    document.getElementById('total-users').textContent = allUsers.length;
-    document.getElementById('total-regular').textContent = allUsers.filter(u => u.role === 'user').length;
-    closeModal();
-});
-
-// Logout
-document.getElementById('logout-btn').addEventListener('click', () => {
-    localStorage.removeItem('token');
-    window.location.href = 'auth.html';
-});
 </script>
-
 </body>
 </html>

@@ -1,352 +1,244 @@
-/* index.js — PulseAI Dashboard */
+/* ═══════════════════════════════════════════════════════════════
+   PulseAI Dashboard — index.js
+   ═══════════════════════════════════════════════════════════════ */
+
+const API = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000'
+    : 'https://pulseai-backend-9yj2.onrender.com';
 
 const token = localStorage.getItem('token');
+if (!token) window.location.href = 'auth.html';
 
-const API_BASE =
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname === 'localhost'
-        ? 'http://127.0.0.1:8000'
-        : 'https://pulseai-backend-9yj2.onrender.com';
+// ─── Toast ──────────────────────────────────────────────────────
+function showToast(msg, type = 'error') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
 
-if (!token) {
+// ─── Logout ─────────────────────────────────────────────────────
+function logout() {
+    localStorage.removeItem('token');
     window.location.href = 'auth.html';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initUser();
-    initDate();
-    initRings();
-    initWorkoutList();
-    initChart();
-    initNav();
-});
+// ─── Auth Headers ───────────────────────────────────────────────
+const authHeaders = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+};
 
-function initDate() {
-    const dateEl = document.getElementById('current-date');
+// ─── Greeting ───────────────────────────────────────────────────
+function setGreeting(name) {
+    const h = new Date().getHours();
+    let greet = 'Good Evening';
+    if (h < 12) greet = 'Good Morning';
+    else if (h < 17) greet = 'Good Afternoon';
+    document.getElementById('greeting-text').textContent = `${greet}, ${name} 👋`;
+}
 
-    if (dateEl) {
-        const options = {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric'
-        };
+function setDate() {
+    const now = new Date();
+    const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('date-text').textContent = now.toLocaleDateString('en-US', opts);
+}
+setDate();
 
-        dateEl.innerHTML = `
-            <i class="ri-calendar-line"></i>
-            ${new Date().toLocaleDateString('en-US', options)}
-        `;
+// ─── Load User ──────────────────────────────────────────────────
+let currentUser = null;
+
+async function loadUser() {
+    try {
+        const res = await fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('sidebar-username').textContent = currentUser.name;
+        document.getElementById('sidebar-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+        document.getElementById('sidebar-role').textContent = currentUser.role === 'admin' ? 'Admin' : 'Member';
+        setGreeting(currentUser.name.split(' ')[0]);
+        if (currentUser.role === 'admin') {
+            document.getElementById('admin-btn').style.display = 'flex';
+        }
+    } catch (err) {
+        showToast('Failed to load user');
     }
 }
 
-function initUser() {
-    if (!token) return;
+// ─── Load Workouts ──────────────────────────────────────────────
+let allWorkouts = [];
 
-    fetch(`${API_BASE}/users/me`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
-        .then(res => {
-            if (!res.ok) {
-                localStorage.removeItem('token');
-                window.location.href = 'auth.html';
-                throw new Error('Unauthorized');
-            }
-            return res.json();
-        })
-        .then(user => {
-            document.querySelector('.greeting h1').innerHTML =
-                `Good Morning, ${user.name} <span class="wave">👋</span>`;
+async function loadWorkouts() {
+    try {
+        const res = await fetch(`${API}/workouts/`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        allWorkouts = await res.json();
 
-            const sidebarName = document.getElementById('sidebar-username');
-            if (sidebarName) {
-                sidebarName.textContent = user.name;
-            }
+        // Stats
+        const total = allWorkouts.length;
+        const completed = allWorkouts.filter(w => w.is_completed).length;
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-completed').textContent = completed;
+        document.getElementById('stat-streak').textContent = Math.min(completed, 7);
 
-            if (user.role === 'admin') {
-                const existingBtn = document.querySelector('.btn-admin');
+        // Workout ring (completed out of 5)
+        setRing('ring-workout', completed, 5);
+        document.getElementById('ring-workout-val').textContent = `${completed}/5`;
 
-                if (!existingBtn) {
-                    const adminBtn = document.createElement('a');
-                    adminBtn.href = 'admin.html';
-                    adminBtn.className = 'btn-admin';
-                    adminBtn.innerHTML =
-                        '<i class="ri-shield-user-fill"></i> Admin Panel';
-
-                    document.querySelector('.header-actions').prepend(adminBtn);
-                }
-            }
-
-            return fetch(`${API_BASE}/workouts/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-        })
-        .then(res => {
-            if (!res) return null;
-            return res.json();
-        })
-        .then(workouts => {
-            if (!workouts) return;
-
-            document.querySelector(
-                '.stats-row .stat-card:first-child .stat-value'
-            ).textContent = workouts.length;
-
-            const completed = workouts.filter(w => w.is_completed).length;
-
-            document.querySelector(
-                '.stats-row .stat-card:nth-child(2) .stat-value'
-            ).textContent = completed;
-        })
-        .catch(err => {
-            console.error('User initialization failed:', err);
-        });
+        // Render plan list
+        renderPlanList();
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-function initRings() {
-    setTimeout(() => {
-        const rings = document.querySelectorAll('.ring-front');
-
-        rings.forEach(ring => {
-            const percent =
-                ring
-                    .getAttribute('style')
-                    ?.match(/--percent:\s*(\d+)/)?.[1] || 0;
-
-            const offset = 314 - (314 * percent) / 100;
-            ring.style.strokeDashoffset = offset;
-        });
-    }, 500);
+function renderPlanList() {
+    const list = document.getElementById('plan-list');
+    if (allWorkouts.length === 0) {
+        list.innerHTML = `<div class="empty-state"><i class="ri-calendar-check-line"></i><p>No workouts yet</p></div>`;
+        return;
+    }
+    // Show latest 5
+    const recent = allWorkouts.slice(0, 5);
+    list.innerHTML = recent.map(w => `
+        <div class="plan-item ${w.is_completed ? 'completed' : ''}" id="plan-${w.id}">
+            <button class="plan-check ${w.is_completed ? 'checked' : ''}" onclick="toggleWorkout(${w.id})">
+                <i class="ri-check-line"></i>
+            </button>
+            <div class="plan-text">
+                <h4>${escapeHtml(w.name)}</h4>
+                <p>${escapeHtml(w.detail)}</p>
+            </div>
+        </div>
+    `).join('');
 }
 
-function initWorkoutList() {
-    const listContainer = document.getElementById('workout-list');
-
-    if (!listContainer || !token) return;
-
-    fetch(`${API_BASE}/workouts/`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('Failed to load workouts');
-            }
-            return res.json();
-        })
-        .then(workouts => {
-            if (!Array.isArray(workouts) || workouts.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="ri-calendar-todo-line"></i>
-                        <p>No workouts planned yet</p>
-                    </div>
-                `;
-                return;
-            }
-
-            listContainer.innerHTML = workouts
-                .map(
-                    workout => `
-                    <div class="workout-item ${
-                        workout.is_completed ? 'completed' : ''
-                    }" id="item-${workout.id}">
-                        <div class="workout-main">
-                            <div class="workout-icon">
-                                <i class="ri-run-fill"></i>
-                            </div>
-                            <div class="workout-info">
-                                <h4>${workout.name}</h4>
-                                <p>${workout.detail}</p>
-                            </div>
-                        </div>
-
-                        <div class="checkbox-wrapper">
-                            <input
-                                type="checkbox"
-                                id="w-${workout.id}"
-                                ${workout.is_completed ? 'checked' : ''}
-                                onchange="toggleWorkout(${workout.id})"
-                            >
-                            <div class="checkbox-custom"></div>
-                        </div>
-                    </div>
-                `
-                )
-                .join('');
-        })
-        .catch(err => {
-            console.error(err);
-
-            listContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="ri-wifi-off-line"></i>
-                    <p>Could not load workouts</p>
-                </div>
-            `;
+async function toggleWorkout(id) {
+    try {
+        const res = await fetch(`${API}/workouts/${id}`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (res.ok) {
+            await loadWorkouts();
+        }
+    } catch (err) {
+        showToast('Failed to update workout');
+    }
 }
 
-window.toggleWorkout = function (id) {
-    fetch(`${API_BASE}/workouts/${id}`, {
-        method: 'PATCH',
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('Failed to update workout');
-            }
-            return res.json();
-        })
-        .then(data => {
-            const item = document.getElementById(`item-${id}`);
-            if (!item) return;
+// ─── Activity Rings ─────────────────────────────────────────────
+function setRing(id, value, max) {
+    const circumference = 2 * Math.PI * 42; // 263.9
+    const pct = Math.min(value / max, 1);
+    const offset = circumference * (1 - pct);
+    document.getElementById(id).style.strokeDashoffset = offset;
+}
 
-            if (data.is_completed) {
-                item.classList.add('completed');
-            } else {
-                item.classList.remove('completed');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-        });
-};
+// ─── Meal History (for ring + chart) ────────────────────────────
+let mealHistory = [];
 
-let progressChart;
+async function loadMealHistory() {
+    try {
+        const res = await fetch(`${API}/api/meal/history`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        mealHistory = data.history || [];
 
-function initChart() {
-    const canvas = document.getElementById('progressChart');
+        // Today's calories for ring
+        const today = new Date().toISOString().split('T')[0];
+        const todayMeal = mealHistory.find(m => m.date === today);
+        const todayCal = todayMeal ? Math.round(todayMeal.total_calories) : 0;
+        setRing('ring-cal', todayCal, 2000);
+        document.getElementById('ring-cal-val').textContent = `${todayCal}`;
 
-    if (!canvas) return;
+        // Build chart
+        buildWeeklyChart();
+    } catch (err) {
+        console.error(err);
+    }
+}
 
-    const ctx = canvas.getContext('2d');
+// ─── Weekly Chart ───────────────────────────────────────────────
+let weeklyChart = null;
+let chartMode = 'calories';
 
-    const dataCalories = [0, 0, 0, 0, 0, 0, 0];
-    const dataMinutes = [0, 0, 0, 0, 0, 0, 0];
+function buildWeeklyChart() {
+    const labels = [];
+    const calData = [];
+    const minData = [];
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(245, 197, 24, 0.4)');
-    gradient.addColorStop(1, 'rgba(245, 197, 24, 0)');
+    // Last 7 days
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        labels.push(dayName);
 
-    progressChart = new Chart(ctx, {
+        const entry = mealHistory.find(m => m.date === dateStr);
+        calData.push(entry ? Math.round(entry.total_calories) : 0);
+        minData.push(entry ? entry.meal_count * 15 : 0); // rough estimate
+    }
+
+    const ctx = document.getElementById('weekly-chart').getContext('2d');
+    if (weeklyChart) weeklyChart.destroy();
+
+    const dataset = chartMode === 'calories'
+        ? { label: 'Calories', data: calData, borderColor: '#F5C518', backgroundColor: 'rgba(245,197,24,0.1)' }
+        : { label: 'Minutes', data: minData, borderColor: '#4ADE80', backgroundColor: 'rgba(74,222,128,0.1)' };
+
+    weeklyChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [
-                {
-                    label: 'Calories Burned',
-                    data: dataCalories,
-                    borderColor: '#F5C518',
-                    backgroundColor: gradient,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#141414',
-                    pointBorderColor: '#F5C518',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
+            labels,
+            datasets: [{
+                ...dataset,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: dataset.borderColor,
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
             plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: '#1A1A1A',
-                    titleColor: '#888',
-                    bodyColor: '#FFF',
-                    borderColor: '#222',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false,
-                    callbacks: {
-                        label: context =>
-                            `${context.parsed.y} ${
-                                context.dataset.label.split(' ')[0]
-                            }`
-                    }
-                }
+                legend: { display: false }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255,255,255,0.05)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#888'
-                    }
-                },
                 x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#888'
-                    }
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    ticks: { color: '#777', font: { size: 12 } }
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    ticks: { color: '#777', font: { size: 12 } },
+                    beginAtZero: true
                 }
             }
         }
     });
-
-    document.querySelectorAll('.chart-toggle').forEach(button => {
-        button.addEventListener('click', e => {
-            document
-                .querySelectorAll('.chart-toggle')
-                .forEach(btn => btn.classList.remove('active'));
-
-            e.currentTarget.classList.add('active');
-
-            const dataset = e.currentTarget.dataset.dataset;
-
-            progressChart.data.datasets[0].data =
-                dataset === 'calories' ? dataCalories : dataMinutes;
-
-            progressChart.data.datasets[0].label =
-                dataset === 'calories'
-                    ? 'Calories Burned'
-                    : 'Minutes Active';
-
-            progressChart.update();
-        });
-    });
 }
 
-function initNav() {
-    const navItems = document.querySelectorAll('.nav-item[data-nav]');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', e => {
-            const href = item.getAttribute('href');
-
-            if (href && href !== '#') return;
-
-            e.preventDefault();
-
-            const target = item.dataset.nav;
-
-            navItems.forEach(nav => nav.classList.remove('active'));
-
-            document
-                .querySelectorAll(`.nav-item[data-nav="${target}"]`)
-                .forEach(nav => nav.classList.add('active'));
-        });
-    });
+function switchChart(mode, btn) {
+    chartMode = mode;
+    document.querySelectorAll('.chart-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buildWeeklyChart();
 }
+
+// ─── Utility ────────────────────────────────────────────────────
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ─── Init ───────────────────────────────────────────────────────
+(async function init() {
+    await loadUser();
+    await loadWorkouts();
+    await loadMealHistory();
+})();

@@ -4,261 +4,362 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PulseAI — Settings</title>
+    <meta name="description" content="Manage your PulseAI account settings, profile, and preferences.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
-<style>
-:root {
-    --accent: #F5C518;
-    --accent-dim: rgba(245,197,24,0.12);
-    --bg: #0C0C0C;
-    --card: #141414;
-    --card2: #1A1A1A;
-    --border: rgba(255,255,255,0.07);
-    --text: #FFFFFF;
-    --text-secondary: #777;
-    --text-dim: #444;
-    --danger: #FF5A5A;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --bottom-nav-h: 66px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-.layout { display: flex; min-height: 100vh; }
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+        }
 
-.sidebar { width: 240px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 16px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
-.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 8px; }
-.logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: grid; place-items: center; color: #000; font-size: 18px; }
-.logo h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
-.text-accent { color: var(--accent); }
-.user-profile { display: flex; align-items: center; gap: 12px; padding: 14px 12px; background: var(--card2); border-radius: var(--radius-sm); margin-bottom: 24px; }
-.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; color: #000; font-size: 16px; font-weight: 700; flex-shrink: 0; }
-.user-info h2 { font-size: 14px; font-weight: 600; }
-.role { font-size: 11px; color: var(--text-secondary); }
-.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: var(--radius-sm); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
-.nav-item i { font-size: 17px; }
-.nav-item:hover { color: var(--text); background: var(--card2); }
-.nav-item.active { color: var(--accent); background: var(--accent-dim); }
-.sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); }
+        /* Profile Card */
+        .profile-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .profile-avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 auto 16px;
+        }
+        .profile-card h2 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        .profile-card .profile-email {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .role-badge.member {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .role-badge.admin {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8B5CF6;
+        }
 
-.main-content { flex: 1; margin-left: 240px; padding: 28px; padding-bottom: 40px; }
+        .profile-logout {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 90, 90, 0.1);
+            color: var(--danger);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .profile-logout:hover {
+            background: rgba(255, 90, 90, 0.2);
+        }
 
-.top-header { margin-bottom: 32px; }
-.page-title h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
-.page-title p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+        /* Settings Sections */
+        .settings-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .settings-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+        .settings-card h3 {
+            font-size: 16px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-card h3 i {
+            color: var(--accent);
+        }
 
-.settings-section { margin-bottom: 28px; }
-.settings-section h2 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .setting-row:last-child { border-bottom: none; }
 
-.settings-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .setting-row .setting-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .setting-row .setting-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
 
-.settings-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.2s;
-}
-.settings-item:last-child { border-bottom: none; }
-.settings-item:hover { background: var(--card2); }
+        /* Toggle Switch */
+        .toggle {
+            width: 44px; height: 24px;
+            background: var(--card2);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .toggle.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+        .toggle.active::after {
+            left: 23px;
+            background: var(--accent);
+        }
 
-.settings-item-left { display: flex; align-items: center; gap: 14px; }
-.settings-icon { width: 36px; height: 36px; background: var(--accent-dim); border-radius: 10px; display: grid; place-items: center; color: var(--accent); font-size: 16px; flex-shrink: 0; }
-.settings-icon.danger-icon { background: rgba(255,90,90,0.1); color: var(--danger); }
+        .settings-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
 
-.settings-label h3 { font-size: 14px; font-weight: 600; }
-.settings-label p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .big-logout {
+            width: 100%;
+            padding: 14px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .big-logout:hover { opacity: 0.9; }
 
-.settings-arrow { color: var(--text-dim); font-size: 18px; }
-
-/* Profile card */
-.profile-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 28px;
-}
-.profile-avatar-lg {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: grid; place-items: center;
-    color: #000; font-size: 26px; font-weight: 800;
-    flex-shrink: 0;
-}
-.profile-info h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
-.profile-info p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-.profile-role { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--accent); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
-
-/* Logout btn */
-.btn-logout {
-    width: 100%; padding: 14px;
-    background: rgba(255,90,90,0.1);
-    border: 1px solid rgba(255,90,90,0.3);
-    border-radius: var(--radius-sm);
-    color: var(--danger);
-    font-size: 15px; font-weight: 700;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all 0.2s;
-    margin-top: 8px;
-}
-.btn-logout:hover { background: rgba(255,90,90,0.2); }
-
-/* Toast */
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1e1e1e; border: 1px solid var(--danger); color: var(--danger); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; }
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.success { border-color: #4ADE80; color: #4ADE80; }
-
-.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-h); background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 200; padding: 0 8px; }
-.bottom-nav .nav-item { flex: 1; flex-direction: column; justify-content: center; gap: 4px; padding: 8px 4px; font-size: 10px; border-radius: 0; text-align: center; height: 100%; }
-.bottom-nav .nav-item i { font-size: 20px; }
-.bottom-nav .nav-item.active { color: var(--accent); background: none; }
-
-@media (max-width: 1024px) {
-    .sidebar { transform: translateX(-100%); }
-    .main-content { margin-left: 0; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-h) + 20px); }
-    .bottom-nav { display: flex; }
-}
-</style>
+        @media (max-width: 768px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+            }
+            .settings-form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="layout">
-    <aside class="sidebar">
-        <div class="logo">
-            <div class="logo-icon"><i class="ri-pulse-line"></i></div>
-            <h1>Pulse<span class="text-accent">AI</span></h1>
-        </div>
-        <div class="user-profile">
-            <div class="avatar" id="sidebar-avatar">A</div>
-            <div class="user-info">
-                <h2 id="sidebar-username">User</h2>
-                <span class="role">Member</span>
-            </div>
-        </div>
-        
-        <div class="sidebar-footer">
-            <button class="nav-item" style="color:var(--danger)" id="logout-sidebar"><i class="ri-logout-box-r-line"></i> Logout</button>
-        </div>
-    </aside>
 
-    <main class="main-content">
-        <div class="top-header">
-            <div class="page-title">
-                <h1>Settings ⚙️</h1>
-                <p>Manage your account and preferences</p>
-            </div>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="ri-pulse-fill"></i></div>
+        <div class="logo-text">Pulse<span>AI</span></div>
+    </div>
+    <div class="user-profile">
+        <div class="avatar" id="sidebar-avatar">A</div>
+        <div class="user-info">
+            <h2 id="sidebar-username">User</h2>
+            <span class="role">Member</span>
         </div>
-
-        <!-- Profile Card -->
-        <div class="profile-card">
-            <div class="profile-avatar-lg" id="profile-avatar">A</div>
-            <div class="profile-info">
-                <h2 id="profile-name">User</h2>
-                <p id="profile-email">user@example.com</p>
-                <div class="profile-role" id="profile-role"><i class="ri-user-fill"></i> Member</div>
-            </div>
-        </div>
-
-        <!-- Account Settings -->
-        <div class="settings-section">
-            <h2>Account</h2>
-            <div class="settings-card">
-                <div class="settings-item">
-                    <div class="settings-item-left">
-                        <div class="settings-icon"><i class="ri-user-line"></i></div>
-                        <div class="settings-label">
-                            <h3>Edit Profile</h3>
-                            <p>Update your name and details</p>
-                        </div>
-                    </div>
-                    <i class="ri-arrow-right-s-line settings-arrow"></i>
-                </div>
-                <div class="settings-item">
-                    <div class="settings-item-left">
-                        <div class="settings-icon"><i class="ri-lock-line"></i></div>
-                        <div class="settings-label">
-                            <h3>Change Password</h3>
-                            <p>Update your password</p>
-                        </div>
-                    </div>
-                    <i class="ri-arrow-right-s-line settings-arrow"></i>
-                </div>
-                <div class="settings-item">
-                    <div class="settings-item-left">
-                        <div class="settings-icon"><i class="ri-notification-line"></i></div>
-                        <div class="settings-label">
-                            <h3>Notifications</h3>
-                            <p>Manage your notifications</p>
-                        </div>
-                    </div>
-                    <i class="ri-arrow-right-s-line settings-arrow"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Danger Zone -->
-        <div class="settings-section">
-            <h2>Session</h2>
-            <div class="settings-card">
-                <div class="settings-item" id="logout-btn" style="cursor:pointer">
-                    <div class="settings-item-left">
-                        <div class="settings-icon danger-icon"><i class="ri-logout-box-r-line"></i></div>
-                        <div class="settings-label">
-                            <h3 style="color:var(--danger)">Logout</h3>
-                            <p>Sign out of your account</p>
-                        </div>
-                    </div>
-                    <i class="ri-arrow-right-s-line settings-arrow"></i>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn-logout" id="logout-big">
+    </div>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i> Dashboard</a>
+        <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i> Workouts</a>
+        <a href="modules.html" class="nav-item"><i class="ri-robot-2-fill"></i> Modules</a>
+        <a href="settings.html" class="nav-item active"><i class="ri-settings-4-fill"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="nav-item logout-btn" onclick="logout()">
             <i class="ri-logout-box-r-line"></i> Logout
         </button>
-    </main>
+    </div>
+</aside>
 
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i><span>Dashboard</span></a>
-        <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i><span>Workouts</span></a>
-        <a href="modules.html" class="nav-item"><i class="ri-robot-2-fill"></i><span>Modules</span></a>
-        <a href="settings.html" class="nav-item active"><i class="ri-settings-4-fill"></i><span>Settings</span></a>
-    </nav>
-</div>
+<!-- MAIN -->
+<main class="main">
+    <h1 class="page-title">Settings</h1>
+
+    <div class="settings-layout">
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="profile-avatar" id="profile-avatar">A</div>
+            <h2 id="profile-name">User</h2>
+            <p class="profile-email" id="profile-email">user@email.com</p>
+            <span class="role-badge member" id="profile-badge">Member</span>
+            <button class="profile-logout" onclick="logout()">
+                <i class="ri-logout-box-r-line"></i> Logout
+            </button>
+        </div>
+
+        <!-- Settings Sections -->
+        <div class="settings-sections">
+            <!-- Edit Profile (UI only) -->
+            <div class="settings-card">
+                <h3><i class="ri-user-settings-line"></i> Edit Profile</h3>
+                <div class="settings-form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" class="form-input" id="edit-name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-input" id="edit-email" placeholder="Your email" disabled>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="showToast('Profile updated!', 'success')">
+                    <i class="ri-save-line"></i> Save Changes
+                </button>
+            </div>
+
+            <!-- Change Password (UI only) -->
+            <div class="settings-card">
+                <h3><i class="ri-lock-password-line"></i> Change Password</h3>
+                <div class="settings-form-row">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" class="form-input" placeholder="Current password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" class="form-input" placeholder="New password">
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="showToast('Password updated!', 'success')">
+                    <i class="ri-refresh-line"></i> Update Password
+                </button>
+            </div>
+
+            <!-- Notifications (UI only) -->
+            <div class="settings-card">
+                <h3><i class="ri-notification-3-line"></i> Notifications</h3>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Workout Reminders</div>
+                        <div class="setting-desc">Get daily reminders for scheduled workouts</div>
+                    </div>
+                    <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Meal Tracking Alerts</div>
+                        <div class="setting-desc">Remind me to log my meals</div>
+                    </div>
+                    <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Weekly Progress Report</div>
+                        <div class="setting-desc">Receive weekly summary of your fitness journey</div>
+                    </div>
+                    <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <button class="big-logout" onclick="logout()">
+                <i class="ri-logout-box-r-line"></i> Sign Out of PulseAI
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <a href="index.html"><i class="ri-dashboard-fill"></i> Dashboard</a>
+    <a href="workouts.html"><i class="ri-run-fill"></i> Workouts</a>
+    <a href="modules.html"><i class="ri-robot-2-fill"></i> Modules</a>
+    <a href="settings.html" class="active"><i class="ri-settings-4-fill"></i> Settings</a>
+</nav>
 
 <div class="toast" id="toast"></div>
 
 <script>
+const API = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000'
+    : 'https://pulseai-backend-9yj2.onrender.com';
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'auth.html';
 
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'auth.html';
+function showToast(msg, type='error') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
 }
+function logout() { localStorage.removeItem('token'); window.location.href = 'auth.html'; }
 
-fetch('https://pulseai-backend-9yj2.onrender.com/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+// Load user
+fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
 .then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
 .then(user => {
     document.getElementById('sidebar-username').textContent = user.name;
     document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+    // Profile card
     document.getElementById('profile-name').textContent = user.name;
     document.getElementById('profile-email').textContent = user.email;
     document.getElementById('profile-avatar').textContent = user.name.charAt(0).toUpperCase();
-    document.getElementById('profile-role').innerHTML = `<i class="ri-${user.role === 'admin' ? 'shield-user' : 'user'}-fill"></i> ${user.role === 'admin' ? 'Admin' : 'Member'}`;
-});
 
-document.getElementById('logout-btn').addEventListener('click', logout);
-document.getElementById('logout-big').addEventListener('click', logout);
-document.getElementById('logout-sidebar').addEventListener('click', logout);
+    const badge = document.getElementById('profile-badge');
+    if (user.role === 'admin') {
+        badge.textContent = 'Admin';
+        badge.className = 'role-badge admin';
+    } else {
+        badge.textContent = 'Member';
+        badge.className = 'role-badge member';
+    }
+
+    // Pre-fill edit form
+    document.getElementById('edit-name').value = user.name;
+    document.getElementById('edit-email').value = user.email;
+});
 </script>
 </body>
 </html>

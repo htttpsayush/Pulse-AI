@@ -3,226 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseAI — AI Modules</title>
+    <title>PulseAI — Modules</title>
+    <meta name="description" content="AI-powered fitness modules — food analysis, push-up counter, posture detection, and more.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
-<style>
-:root {
-    --accent: #F5C518;
-    --accent-dim: rgba(245,197,24,0.12);
-    --accent-glow: rgba(245,197,24,0.25);
-    --bg: #0C0C0C;
-    --card: #141414;
-    --card2: #1A1A1A;
-    --border: rgba(255,255,255,0.07);
-    --text: #FFFFFF;
-    --text-secondary: #777;
-    --text-dim: #444;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --bottom-nav-h: 66px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-.layout { display: flex; min-height: 100vh; }
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
 
-.sidebar { width: 240px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 16px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
-.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 8px; }
-.logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: grid; place-items: center; color: #000; font-size: 18px; }
-.logo h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
-.text-accent { color: var(--accent); }
-.user-profile { display: flex; align-items: center; gap: 12px; padding: 14px 12px; background: var(--card2); border-radius: var(--radius-sm); margin-bottom: 24px; }
-.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; color: #000; font-size: 16px; font-weight: 700; flex-shrink: 0; }
-.user-info h2 { font-size: 14px; font-weight: 600; }
-.role { font-size: 11px; color: var(--text-secondary); }
-.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: var(--radius-sm); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-.nav-item i { font-size: 17px; }
-.nav-item:hover { color: var(--text); background: var(--card2); }
-.nav-item.active { color: var(--accent); background: var(--accent-dim); }
-.sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); }
+        .module-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card:hover {
+            border-color: var(--accent-glow);
+            transform: translateY(-4px);
+        }
 
-.main-content { flex: 1; margin-left: 240px; padding: 28px; padding-bottom: 40px; }
+        .module-card .module-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .module-icon.yellow {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .module-icon.blue {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60A5FA;
+        }
+        .module-icon.pink {
+            background: rgba(244, 114, 182, 0.15);
+            color: #F472B6;
+        }
+        .module-icon.green {
+            background: rgba(74, 222, 128, 0.15);
+            color: var(--success);
+        }
 
-.top-header { margin-bottom: 32px; }
-.page-title h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
-.page-title p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+        .module-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .module-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex: 1;
+        }
 
-.modules-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
+        .module-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            width: fit-content;
+        }
+        .module-badge.live {
+            background: rgba(74, 222, 128, 0.15);
+            color: var(--success);
+        }
+        .module-badge.coming {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-dim);
+        }
+        .module-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
 
-.module-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-}
-.module-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-.module-card:hover { border-color: var(--accent-glow); transform: translateY(-4px); }
-.module-card:hover::before { transform: scaleX(1); }
+        .module-action {
+            padding: 11px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            border: none;
+        }
+        .module-action.live-btn {
+            background: var(--accent);
+            color: #000;
+        }
+        .module-action.live-btn:hover {
+            background: #e0b416;
+        }
+        .module-action.disabled-btn {
+            background: var(--card2);
+            color: var(--text-dim);
+            cursor: not-allowed;
+        }
 
-.module-icon {
-    width: 52px; height: 52px;
-    background: var(--accent-dim);
-    border-radius: 14px;
-    display: grid; place-items: center;
-    color: var(--accent);
-    font-size: 24px;
-}
-.module-card h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
-.module-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; flex: 1; }
-
-.module-status {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.5px;
-}
-.status-dot { width: 7px; height: 7px; border-radius: 50%; }
-.status-dot.live { background: #4ADE80; box-shadow: 0 0 6px #4ADE80; }
-.status-dot.coming { background: var(--text-dim); }
-
-.btn-launch {
-    width: 100%; padding: 12px;
-    background: var(--accent);
-    color: #000; border: none;
-    border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 700;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: opacity 0.2s, transform 0.15s;
-}
-.btn-launch:hover { opacity: 0.88; transform: scale(0.98); }
-.btn-launch.disabled { background: var(--card2); color: var(--text-dim); cursor: not-allowed; }
-.btn-launch.disabled:hover { opacity: 1; transform: none; }
-
-.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-h); background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 200; padding: 0 8px; }
-.bottom-nav .nav-item { flex: 1; flex-direction: column; justify-content: center; gap: 4px; padding: 8px 4px; font-size: 10px; border-radius: 0; text-align: center; height: 100%; }
-.bottom-nav .nav-item i { font-size: 20px; }
-.bottom-nav .nav-item.active { color: var(--accent); background: none; }
-
-@media (max-width: 1024px) {
-    .sidebar { transform: translateX(-100%); }
-    .main-content { margin-left: 0; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-h) + 20px); }
-    .bottom-nav { display: flex; }
-    .modules-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 600px) {
-    .modules-grid { grid-template-columns: 1fr; }
-}
-</style>
+        @media (max-width: 1024px) {
+            .modules-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .modules-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-<div class="layout">
-    <aside class="sidebar">
-        <div class="logo">
-            <div class="logo-icon"><i class="ri-pulse-line"></i></div>
-            <h1>Pulse<span class="text-accent">AI</span></h1>
-        </div>
-        <div class="user-profile">
-            <div class="avatar" id="sidebar-avatar">A</div>
-            <div class="user-info">
-                <h2 id="sidebar-username">User</h2>
-                <span class="role">Member</span>
-            </div>
-        </div>
-        
-        <div class="sidebar-footer">
-            <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
-        </div>
-    </aside>
 
-    <main class="main-content">
-        <div class="top-header">
-            <div class="page-title">
-                <h1>AI Modules 🤖</h1>
-                <p>Real-time AI powered fitness tracking tools</p>
-            </div>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="ri-pulse-fill"></i></div>
+        <div class="logo-text">Pulse<span>AI</span></div>
+    </div>
+    <div class="user-profile">
+        <div class="avatar" id="sidebar-avatar">A</div>
+        <div class="user-info">
+            <h2 id="sidebar-username">User</h2>
+            <span class="role">Member</span>
         </div>
-
-        <div class="modules-grid">
-            <div class="module-card">
-                <div class="module-icon"><i class="ri-camera-fill"></i></div>
-                <h3>Food Analyzer</h3>
-                <p>Upload food image and get instant nutrition breakdown with 7-day tracking.</p>
-                <div class="module-status">
-                    <div class="status-dot live"></div>
-                    <span style="color:#4ADE80">Live</span>
-                </div>
-                <button class="btn-launch" onclick="window.location.href='food-analyzer.html'">
-                    Launch <i class="ri-arrow-right-line"></i>
-                </button>
-            </div>
-            
-            <div class="module-card">
-                <div class="module-icon"><i class="ri-arrow-up-circle-fill"></i></div>
-                <h3>PushUp Counter</h3>
-                <p>Real-time push-up detection using MediaPipe pose estimation. Tracks elbow angle and counts reps automatically.</p>
-                <div class="module-status">
-                    <div class="status-dot live"></div>
-                    <span style="color:#4ADE80">Live</span>
-                </div>
-                <button class="btn-launch" onclick="window.open('https://pushup-counter-nine.vercel.app/', '_blank')">
-                    Launch <i class="ri-arrow-right-line"></i>
-                </button>
-            </div>
-
-            <div class="module-card">
-                <div class="module-icon"><i class="ri-body-scan-fill"></i></div>
-                <h3>Squat Detector</h3>
-                <p>AI-powered squat depth and posture analysis. Ensures proper form and counts reps in real-time.</p>
-                <div class="module-status">
-                    <div class="status-dot coming"></div>
-                    <span style="color:var(--text-dim)">Coming Soon</span>
-                </div>
-                <button class="btn-launch disabled">Coming Soon</button>
-            </div>
-
-            <div class="module-card">
-                <div class="module-icon"><i class="ri-accessibility-fill"></i></div>
-                <h3>Posture Analyzer</h3>
-                <p>Check your spine alignment and ergonomics using your camera. Get real-time posture correction feedback.</p>
-                <div class="module-status">
-                    <div class="status-dot coming"></div>
-                    <span style="color:var(--text-dim)">Coming Soon</span>
-                </div>
-                <button class="btn-launch disabled">Coming Soon</button>
-            </div>
-        </div>
-    </main>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i><span>Dashboard</span></a>
-        <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i><span>Workouts</span></a>
-        <a href="modules.html" class="nav-item active"><i class="ri-robot-2-fill"></i><span>Modules</span></a>
-        <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i><span>Settings</span></a>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item"><i class="ri-dashboard-fill"></i> Dashboard</a>
+        <a href="workouts.html" class="nav-item"><i class="ri-run-fill"></i> Workouts</a>
+        <a href="modules.html" class="nav-item active"><i class="ri-robot-2-fill"></i> Modules</a>
+        <a href="settings.html" class="nav-item"><i class="ri-settings-4-fill"></i> Settings</a>
     </nav>
-</div>
+    <div class="sidebar-footer">
+        <button class="nav-item logout-btn" onclick="logout()">
+            <i class="ri-logout-box-r-line"></i> Logout
+        </button>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+    <h1 class="page-title">AI Modules</h1>
+
+    <div class="modules-grid">
+        <!-- Food Analyzer -->
+        <div class="module-card">
+            <div class="module-icon yellow"><i class="ri-restaurant-2-fill"></i></div>
+            <div class="module-badge live"><span class="dot"></span> Live</div>
+            <h3>Food Analyzer</h3>
+            <p>Upload a food photo and get instant AI-powered nutrition breakdown with calorie tracking.</p>
+            <a href="food-analyzer.html" class="module-action live-btn">Open Module</a>
+        </div>
+
+        <!-- PushUp Counter -->
+        <div class="module-card">
+            <div class="module-icon blue"><i class="ri-body-scan-fill"></i></div>
+            <div class="module-badge live"><span class="dot"></span> Live</div>
+            <h3>PushUp Counter</h3>
+            <p>Real-time push-up detection using your camera. Counts reps automatically with pose estimation.</p>
+            <a href="https://pushup-counter-nine.vercel.app/" target="_blank" class="module-action live-btn">Open Module</a>
+        </div>
+
+        <!-- Squat Detector -->
+        <div class="module-card">
+            <div class="module-icon pink"><i class="ri-walk-fill"></i></div>
+            <div class="module-badge coming"><span class="dot"></span> Coming Soon</div>
+            <h3>Squat Detector</h3>
+            <p>AI-powered squat form analysis. Get real-time feedback on depth, knee alignment, and posture.</p>
+            <button class="module-action disabled-btn" disabled>Coming Soon</button>
+        </div>
+
+        <!-- Posture Analyzer -->
+        <div class="module-card">
+            <div class="module-icon green"><i class="ri-user-heart-fill"></i></div>
+            <div class="module-badge coming"><span class="dot"></span> Coming Soon</div>
+            <h3>Posture Analyzer</h3>
+            <p>Analyze your sitting and standing posture. Get alerts and exercises to improve alignment.</p>
+            <button class="module-action disabled-btn" disabled>Coming Soon</button>
+        </div>
+    </div>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <a href="index.html"><i class="ri-dashboard-fill"></i> Dashboard</a>
+    <a href="workouts.html"><i class="ri-run-fill"></i> Workouts</a>
+    <a href="modules.html" class="active"><i class="ri-robot-2-fill"></i> Modules</a>
+    <a href="settings.html"><i class="ri-settings-4-fill"></i> Settings</a>
+</nav>
+
+<div class="toast" id="toast"></div>
 
 <script>
+const API = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000'
+    : 'https://pulseai-backend-9yj2.onrender.com';
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'auth.html';
 
-fetch('https://pulseai-backend-9yj2.onrender.com/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+function showToast(msg, type='error') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+function logout() { localStorage.removeItem('token'); window.location.href = 'auth.html'; }
+
+// Load user
+fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
 .then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
 .then(user => {
     document.getElementById('sidebar-username').textContent = user.name;
