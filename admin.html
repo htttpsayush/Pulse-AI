@@ -194,7 +194,7 @@ function escapeHtml(s) { const d = document.createElement('div'); d.textContent 
 
 // ─── Verify Admin ───────────────────────────────────────
 fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
-.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
+.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; throw new Error('unauthorized'); } return r.json(); })
 .then(user => {
     if (user.role !== 'admin') {
         window.location.href = 'index.html';
@@ -229,7 +229,7 @@ async function loadUsers() {
                 <td>${escapeHtml(u.email)}</td>
                 <td><span class="role-cell ${u.role}">${u.role}</span></td>
                 <td>
-                    <button class="delete-user-btn" onclick="deleteUser(${u.id}, '${escapeHtml(u.name)}')" title="Delete user">
+                    <button class="delete-user-btn" onclick="deleteUser(${u.id}, '${escapeHtml(u.name).replace(/'/g, "&#39;")}')" title="Delete user">
                         <i class="ri-delete-bin-6-line"></i>
                     </button>
                 </td>

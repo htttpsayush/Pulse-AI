@@ -252,7 +252,12 @@
                     <option value="3">3 Days</option>
                     <option value="5" selected>5 Days</option>
                     <option value="7">7 Days</option>
+                    <option value="custom">Custom</option>
                 </select>
+            </div>
+            <div class="form-group" id="custom-days-group" style="display:none;">
+                <label>Custom Days</label>
+                <input type="number" class="form-input" id="ai-days-custom" placeholder="Enter days (1-30)" min="1" max="30">
             </div>
         </div>
         <button class="btn btn-primary" id="generate-btn" onclick="generatePlan()">
@@ -291,7 +296,7 @@ function escapeHtml(s) { const d = document.createElement('div'); d.textContent 
 
 // ─── Load User ──────────────────────────────────────────
 fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
-.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
+.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; throw new Error('unauthorized'); } return r.json(); })
 .then(user => {
     document.getElementById('sidebar-username').textContent = user.name;
     document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
@@ -363,9 +368,31 @@ async function deleteWorkout(id) {
     loadWorkouts();
 }
 
+// ─── Custom Days Toggle ─────────────────────────────────
+const daysSelect = document.getElementById('ai-days');
+const customDaysGroup = document.getElementById('custom-days-group');
+
+daysSelect.addEventListener('change', function() {
+    customDaysGroup.style.display = this.value === 'custom' ? '' : 'none';
+});
+
 // ─── AI Plan ────────────────────────────────────────────
 async function generatePlan() {
     const btn = document.getElementById('generate-btn');
+
+    // Resolve days value
+    let days;
+    if (daysSelect.value === 'custom') {
+        const customInput = document.getElementById('ai-days-custom');
+        days = parseInt(customInput.value);
+        if (isNaN(days) || days < 1 || days > 30) {
+            showToast('Please enter a valid number of days (1-30)');
+            return;
+        }
+    } else {
+        days = parseInt(daysSelect.value);
+    }
+
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Generating...';
     try {
@@ -376,7 +403,7 @@ async function generatePlan() {
             goal: document.getElementById('ai-goal').value,
             level: document.getElementById('ai-level').value,
             diet: document.getElementById('ai-diet').value,
-            days: parseInt(document.getElementById('ai-days').value)
+            days: days
         };
         const res = await fetch(`${API}/workouts/generate-plan`, {
             method: 'POST',
@@ -397,7 +424,11 @@ async function generatePlan() {
 
 function renderPlan(plan) {
     const container = document.getElementById('ai-results');
-    container.innerHTML = plan.map((day, i) => `
+    container.innerHTML = `
+        <button class="btn btn-primary" id="add-all-btn" onclick="addAllPlanWorkouts()" style="width:100%;margin-bottom:18px;">
+            <i class="ri-download-2-line"></i> Add All to My Workouts
+        </button>
+    ` + plan.map((day, i) => `
         <div class="day-card">
             <div class="day-header" onclick="toggleDay(this)">
                 <h4>${escapeHtml(day.day)}</h4>
@@ -441,6 +472,37 @@ async function addDayWorkouts(dayIndex) {
     }
     showToast(`${day.day} workouts added!`, 'success');
     loadWorkouts();
+}
+
+async function addAllPlanWorkouts() {
+    const plan = window._generatedPlan;
+    if (!plan || plan.length === 0) return;
+
+    const btn = document.getElementById('add-all-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+    try {
+        for (let i = 0; i < plan.length; i++) {
+            const day = plan[i];
+            const detail = day.exercises.map(ex => `${ex.name} — ${ex.detail}`).join(', ');
+            await fetch(`${API}/workouts/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: `${day.day} - AI Plan`,
+                    detail: detail
+                })
+            });
+        }
+        showToast('Workout plan saved! Check your workouts.', 'success');
+        loadWorkouts();
+    } catch (err) {
+        showToast('Failed to save plan: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ri-download-2-line"></i> Add All to My Workouts';
+    }
 }
 </script>
 </body>

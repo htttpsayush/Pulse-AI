@@ -78,6 +78,54 @@
         </div>
     </div>
 
+    <!-- BMI & PULSESCORE -->
+    <div class="dash-grid" style="margin-bottom: 24px;">
+        <!-- BMI CARD -->
+        <div class="card" id="bmi-card">
+            <div class="card-header">
+                <h3><i class="ri-heart-pulse-line" style="color:#F5C518;margin-right:6px"></i> BMI</h3>
+                <span class="card-action" onclick="showBmiSetup()" id="bmi-setup-link">Set up →</span>
+            </div>
+            <div id="bmi-content">
+                <div class="empty-state" style="padding:20px 0">
+                    <i class="ri-scales-3-line"></i>
+                    <p>Set your weight & height in Settings to see BMI</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PULSESCORE CARD -->
+        <div class="card" id="pulsescore-card">
+            <div class="card-header">
+                <h3><i class="ri-pulse-fill" style="color:#F5C518;margin-right:6px"></i> PulseScore</h3>
+            </div>
+            <div id="pulsescore-content" style="display:flex;align-items:center;gap:24px;">
+                <svg viewBox="0 0 100 100" style="width:100px;height:100px;flex-shrink:0;">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--card2)" stroke-width="8"/>
+                    <circle id="pulse-ring" cx="50" cy="50" r="42" fill="none" stroke="#F5C518"
+                        stroke-width="8" stroke-linecap="round"
+                        stroke-dasharray="263.9" stroke-dashoffset="263.9"
+                        style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s ease;"/>
+                    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+                        fill="#fff" font-family="Syne,sans-serif" font-weight="700" font-size="22"
+                        id="pulse-score-text">—</text>
+                </svg>
+                <div>
+                    <div style="font-size:14px;color:var(--text-secondary);margin-bottom:4px;">Weekly Score</div>
+                    <div id="pulse-message" style="font-size:13px;color:var(--text-dim);">Loading...</div>
+                    <div style="display:flex;gap:16px;margin-top:8px;">
+                        <div style="font-size:12px;color:var(--text-secondary);">
+                            🍽️ <span id="pulse-meal" style="color:var(--accent);">0</span>/50
+                        </div>
+                        <div style="font-size:12px;color:var(--text-secondary);">
+                            💪 <span id="pulse-workout" style="color:#4ADE80;">0</span>/50
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- RINGS -->
     <div class="rings-row">
         <div class="ring-card">

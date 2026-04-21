@@ -337,7 +337,7 @@ function logout() { localStorage.removeItem('token'); window.location.href = 'au
 
 // Load user
 fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
-.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
+.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; throw new Error('unauthorized'); } return r.json(); })
 .then(user => {
     document.getElementById('sidebar-username').textContent = user.name;
     document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();

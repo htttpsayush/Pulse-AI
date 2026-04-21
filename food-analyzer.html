@@ -254,6 +254,17 @@
             </div>
             <div class="food-tags" id="food-tags"></div>
 
+            <!-- Diet Type -->
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Diet Type</label>
+                <select class="form-select" id="diet-type">
+                    <option value="all" selected>All</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="non-vegetarian">Non-Vegetarian</option>
+                </select>
+            </div>
+
             <!-- Analyze Button -->
             <button class="btn btn-primary" id="analyze-btn" onclick="analyzeFood()" style="width: 100%;">
                 <i class="ri-search-eye-line"></i> Analyze
@@ -332,7 +343,7 @@ function logout() { localStorage.removeItem('token'); window.location.href = 'au
 
 // Load user
 fetch(`${API}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
-.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; } return r.json(); })
+.then(r => { if (!r.ok) { localStorage.removeItem('token'); window.location.href = 'auth.html'; throw new Error('unauthorized'); } return r.json(); })
 .then(user => {
     document.getElementById('sidebar-username').textContent = user.name;
     document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
@@ -427,8 +438,11 @@ async function analyzeFood() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Analyzing...';
 
+    const dietType = document.getElementById('diet-type').value;
+
     const formData = new FormData();
     formData.append('portion', portion);
+    formData.append('diet_type', dietType);
     if (selectedFile) formData.append('image', selectedFile);
     if (manualFoods.length > 0) formData.append('manual_foods', JSON.stringify(manualFoods));
 
@@ -538,6 +552,35 @@ async function loadHistory() {
     }
 }
 loadHistory();
+
+// ─── Weekly Eating Pattern ──────────────────────────────
+async function loadAnalytics() {
+    try {
+        const res = await fetch(`${API}/api/meal/analytics`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Create insight card below the chart
+        const chartCard = document.querySelector('.chart-card') || document.getElementById('history-chart')?.closest('.card');
+        if (!chartCard) return;
+
+        // Remove old insight if exists
+        const old = document.getElementById('eating-pattern-insight');
+        if (old) old.remove();
+
+        const insightEl = document.createElement('div');
+        insightEl.id = 'eating-pattern-insight';
+        insightEl.style.cssText = 'margin-top:16px;padding:14px 18px;background:var(--card2);border-radius:10px;font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:10px;';
+        insightEl.innerHTML = `
+            <i class="ri-bar-chart-grouped-line" style="font-size:20px;color:var(--accent);"></i>
+            <span>${data.insight}</span>
+        `;
+        chartCard.appendChild(insightEl);
+    } catch (err) {
+        console.error('Analytics error:', err);
+    }
+}
+loadAnalytics();
 </script>
 </body>
 </html>

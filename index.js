@@ -236,9 +236,113 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+// ─── BMI ────────────────────────────────────────────────────────
+async function loadBMI() {
+    try {
+        const res = await fetch(`${API}/users/bmi`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return; // user hasn't set weight/height yet
+        const data = await res.json();
+
+        const colorMap = { Underweight: '#60A5FA', Normal: '#4ADE80', Overweight: '#FBBF24', Obese: '#FF5A5A' };
+        const color = colorMap[data.category] || '#F5C518';
+
+        document.getElementById('bmi-content').innerHTML = `
+            <div style="display:flex;align-items:center;gap:20px;">
+                <div style="text-align:center;">
+                    <div style="font-family:Syne,sans-serif;font-size:42px;font-weight:700;color:${color};">${data.bmi}</div>
+                    <div style="font-size:13px;font-weight:600;color:${color};margin-top:2px;">${data.category}</div>
+                </div>
+                <div style="flex:1;">
+                    <div style="height:8px;background:var(--card2);border-radius:4px;overflow:hidden;margin-bottom:8px;">
+                        <div style="height:100%;width:${Math.min((data.bmi / 40) * 100, 100)}%;background:${color};border-radius:4px;transition:width 1s ease;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);">
+                        <span>18.5</span><span>25</span><span>30</span><span>40</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                        ${data.weight} kg · ${data.height} cm
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('bmi-setup-link').textContent = 'Update →';
+    } catch (err) {
+        console.error('BMI load error:', err);
+    }
+}
+
+function showBmiSetup() {
+    const content = document.getElementById('bmi-content');
+    content.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="form-group" style="margin:0;flex:1;min-width:100px;">
+                <label>Weight (kg)</label>
+                <input type="number" class="form-input" id="bmi-weight" placeholder="70" value="${currentUser?.weight || ''}">
+            </div>
+            <div class="form-group" style="margin:0;flex:1;min-width:100px;">
+                <label>Height (cm)</label>
+                <input type="number" class="form-input" id="bmi-height" placeholder="175" value="${currentUser?.height || ''}">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="saveBmi()">Save</button>
+        </div>
+    `;
+}
+
+async function saveBmi() {
+    const weight = parseFloat(document.getElementById('bmi-weight').value);
+    const height = parseFloat(document.getElementById('bmi-height').value);
+    if (!weight || !height || weight <= 0 || height <= 0) {
+        showToast('Enter valid weight and height');
+        return;
+    }
+    try {
+        const res = await fetch(`${API}/users/me`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ weight, height }),
+        });
+        if (!res.ok) throw new Error('Failed to save');
+        currentUser = await res.json();
+        showToast('Profile updated!', 'success');
+        await loadBMI();
+    } catch (err) {
+        showToast(err.message);
+    }
+}
+
+// ─── PulseScore ─────────────────────────────────────────────────
+async function loadPulseScore() {
+    try {
+        const res = await fetch(`${API}/users/pulsescore`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Animate ring
+        const circumference = 2 * Math.PI * 42; // 263.9
+        const offset = circumference * (1 - data.pulsescore / 100);
+        document.getElementById('pulse-ring').style.strokeDashoffset = offset;
+
+        // Update color based on score
+        const ringEl = document.getElementById('pulse-ring');
+        if (data.pulsescore >= 80) ringEl.setAttribute('stroke', '#4ADE80');
+        else if (data.pulsescore >= 60) ringEl.setAttribute('stroke', '#F5C518');
+        else if (data.pulsescore >= 40) ringEl.setAttribute('stroke', '#FBBF24');
+        else ringEl.setAttribute('stroke', '#FF5A5A');
+
+        document.getElementById('pulse-score-text').textContent = Math.round(data.pulsescore);
+        document.getElementById('pulse-message').textContent = data.message;
+        document.getElementById('pulse-meal').textContent = data.meal_score;
+        document.getElementById('pulse-workout').textContent = data.workout_score;
+    } catch (err) {
+        console.error('PulseScore error:', err);
+    }
+}
+
 // ─── Init ───────────────────────────────────────────────────────
 (async function init() {
     await loadUser();
     await loadWorkouts();
     await loadMealHistory();
+    await loadBMI();
+    await loadPulseScore();
 })();
